@@ -4,46 +4,43 @@ using UnityEngine.Events;
 
 public class PathFollower : MonoBehaviour
 {
+    [SerializeField] private Waypoint[] _waypoints;
     [SerializeField] private float _speed;
-    [SerializeField] private float _arrivalthreshold = 0.1f;
+    [SerializeField] private float _arrivaltreshold = 0.1f;
+    public UnityEvent OnPathComplete;
 
-    [SerializeField]
-    private UnityEvent _OnPathComplete;
-    public UnityEvent OnPathComplete => _OnPathComplete;
+    private int _currentWaypointIndex;
 
-    //private int _currentWaypointIndex;
-    private Path _path;
-    private Waypoint _currentWaypoint;
-    // Start is called before the first frame update
-    void Start()
+    private void Start()
     {
-        _path = FindObjectOfType<Path>();
-        _currentWaypoint = _path.GetPathStart();
+        _currentWaypointIndex = 0;
     }
 
-    // Update is called once per frame
-    void Update()
+    private void Update()
     {
-        Vector3 heightOffsetPosition = new Vector3(_currentWaypoint.Position.x,
-            transform.position.y, _currentWaypoint.Position.z);
+        Vector3 heightOffsetPosition = new Vector3(_waypoints[_currentWaypointIndex].Position.x, transform.position.y, _waypoints[_currentWaypointIndex].Position.z);
         float distance = Vector3.Distance(transform.position, heightOffsetPosition);
 
-        if (distance <= _arrivalthreshold)
+        if (distance <= _arrivaltreshold)
         {
-            if (_currentWaypoint == _path.GetPathEnd())
+            if (_currentWaypointIndex == _waypoints.Length - 1)
             {
                 print("Ik ben bij het eindpunt");
-                _OnPathComplete?.Invoke();
+                OnPathComplete?.Invoke();
+                }
+                else
+                {
+                    _currentWaypointIndex++;
+                }
             }
             else
             {
-                _currentWaypoint = _path.GetNextWaypoint(_currentWaypoint);
-            }
-        }
-        else
-        {
             transform.LookAt(heightOffsetPosition);
             transform.Translate(Vector3.forward * _speed * Time.deltaTime);
+            }
         }
     }
-}
+
+
+
+
